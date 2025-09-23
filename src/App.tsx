@@ -81,13 +81,12 @@ function App() {
           <div className="flex items-center gap-3">
             <TestTube size={32} className="text-primary" />
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Test Automation Practice Hub</h1>
+              <h1 className="text-2xl font-bold text-foreground">Test Automation Practice Hub - gauravkhurana.in</h1>
               <p className="text-muted-foreground">Master Selenium, Playwright, Cypress & more</p>
             </div>
           </div>
         </div>
       </header>
-
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-7">
@@ -202,7 +201,7 @@ function App() {
         </Tabs>
       </main>
     </div>
-  )
+  );
 }
 
 export default App
