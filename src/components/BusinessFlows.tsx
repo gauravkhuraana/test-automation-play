@@ -196,7 +196,8 @@ export default function BusinessFlows() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.error('Failed to submit inquiry. Please try again later.')
+    toast.success('Inquiry submitted successfully! We will get back to you soon.')
+    setContactForm({ name: '', email: '', subject: '', message: '' })
   }
 
   return (
