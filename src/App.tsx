@@ -82,7 +82,7 @@ function App() {
             <TestTube size={32} className="text-primary" />
             <div>
               <h1 className="text-2xl font-bold text-foreground">Test Automation Practice Hub</h1>
-              <p className="text-muted-foreground">Master Selenium, Playwright, Cypress & more</p>
+              <p className="text-muted-foreground">This website contains every common scenario you'll encounter in real-world test automation projects. Each section is designed to challenge different aspects of your automation framework, from basic element interactions to complex business workflows.</p>
             </div>
           </div>
         </div>
