@@ -11,7 +11,7 @@ import { Monitor, Warning, ChartBar, PaintBrush } from '@phosphor-icons/react'
 export default function AdvancedFeatures() {
   const [dynamicId, setDynamicId] = useState(`element-${Date.now()}`)
   const [chartData] = useState([
-    { name: 'Jan', value: 400 },
+    { name: 'January', value: 400 },
     { name: 'Feb', value: 300 },
     { name: 'Mar', value: 600 },
     { name: 'Apr', value: 800 },
