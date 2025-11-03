@@ -194,9 +194,9 @@ export default function BusinessFlows() {
   const submitContactForm = () => {
     if (!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.message) {
       toast.error('Please fill in all required fields')
-      return
+    } else {
+      toast.error('Failed to submit inquiry. Please try again later.')
     }
-    toast.error('Failed to submit inquiry. Please try again later.')
   }
 
   return (
