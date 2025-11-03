@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { TestTube, Mouse, Lightning, Building, Globe, Cpu } from '@phosphor-icons/react'
+import { TestTube, Mouse, Lightning, Building, Globe, Cpu, Bug } from '@phosphor-icons/react'
 import BasicElements from './components/BasicElements'
 import IntermediateScenarios from './components/IntermediateScenarios'
 import AdvancedFeatures from './components/AdvancedFeatures'
 import BusinessFlows from './components/BusinessFlows'
 import SystemFeatures from './components/SystemFeatures'
 import ComplexScenarios from './components/ComplexScenarios'
+import BuggyPage from './components/BuggyPage'
 
 function App() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -61,6 +62,14 @@ function App() {
       description: "Real-time updates and challenging edge cases",
       scenarios: ["Delayed loading", "WebSocket updates", "Retry logic", "Hidden elements", "API-driven content"],
       difficulty: "Expert"
+    },
+    {
+      id: "buggy",
+      title: "Buggy Page",
+      icon: Bug,
+      description: "Common automation problems and pitfalls to practice",
+      scenarios: ["Dynamic IDs", "Stale elements", "Race conditions", "Overlapping elements", "Hidden inputs", "Disabled buttons"],
+      difficulty: "Advanced"
     }
   ]
 
@@ -89,7 +98,7 @@ function App() {
       </header>
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="basic">Basic</TabsTrigger>
             <TabsTrigger value="intermediate">Intermediate</TabsTrigger>
@@ -97,6 +106,7 @@ function App() {
             <TabsTrigger value="business">Business</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
             <TabsTrigger value="complex">Complex</TabsTrigger>
+            <TabsTrigger value="buggy">Buggy</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -197,6 +207,10 @@ function App() {
 
           <TabsContent value="complex">
             <ComplexScenarios />
+          </TabsContent>
+
+          <TabsContent value="buggy">
+            <BuggyPage />
           </TabsContent>
         </Tabs>
       </main>
