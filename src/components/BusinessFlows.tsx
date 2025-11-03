@@ -192,7 +192,11 @@ export default function BusinessFlows() {
   }
 
   const submitContactForm = () => {
-    toast.error('Failed to submit contact form. Please try again later.')
+    if (!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.message) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    toast.error('Failed to submit inquiry. Please try again later.')
   }
 
   return (
@@ -656,7 +660,7 @@ export default function BusinessFlows() {
 
           <Button 
             onClick={submitContactForm}
-            disabled={!contactForm.name || !contactForm.email || !contactForm.message}
+            disabled={!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.message}
             data-testid="submit-contact"
           >
             Submit Inquiry
