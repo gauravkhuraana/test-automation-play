@@ -82,14 +82,11 @@ function App() {
             <TestTube size={32} className="text-primary" />
             <div>
               <h1 className="text-2xl font-bold text-foreground">Test Automation Practice Hub</h1>
-              <p className="text-muted-foreground">
-                This website contains every common scenario you'll encounter in real-world test automation projects. Each section is designed to challenge different aspects of your automation framework, from basic element interactions to complex business workflows.
-              </p>
+              <p className="text-muted-foreground">For Selenium, Playwright, Cypress, etc. This website contains every common scenario you'll encounter in real-world test automation projects. Each section is designed to challenge different aspects of your automation framework, from basic element interactions to complex business workflows.</p>
             </div>
           </div>
         </div>
       </header>
-
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-7">
@@ -204,7 +201,7 @@ function App() {
         </Tabs>
       </main>
     </div>
-  )
+  );
 }
 
 export default App
