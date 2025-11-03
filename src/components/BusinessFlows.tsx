@@ -192,8 +192,7 @@ export default function BusinessFlows() {
   }
 
   const submitContactForm = () => {
-    toast.success('Contact form submitted successfully!')
-    setContactForm({ name: '', email: '', subject: '', message: '' })
+    toast.error('Failed to submit contact form. Please try again later.')
   }
 
   return (
