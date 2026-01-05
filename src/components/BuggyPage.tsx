@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams, Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,13 +9,59 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Bug, Warning, CheckCircle } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
+interface FlakesUser {
+  email: string
+  name: string
+  password: string
+}
+
 export default function BuggyPage() {
+  const [searchParams] = useSearchParams()
   const [disappearingText, setDisappearingText] = useState('Click me!')
   const [randomId, setRandomId] = useState('')
   const [slowLoadVisible, setSlowLoadVisible] = useState(false)
   const [overlayVisible, setOverlayVisible] = useState(false)
   const [clickCount, setClickCount] = useState(0)
   const [detachedElement, setDetachedElement] = useState(false)
+
+  // FLAKES Demo state
+  const [users, setUsers] = useState<FlakesUser[]>([])
+  const [currentFlakesUser, setCurrentFlakesUser] = useState<FlakesUser | null>(null)
+  const [userCreatedMsg, setUserCreatedMsg] = useState(false)
+  const [userDeletedMsg, setUserDeletedMsg] = useState(false)
+  const [updateSuccess, setUpdateSuccess] = useState(false)
+  const [userDetailsVisible, setUserDetailsVisible] = useState(false)
+  const [editingUserEmail, setEditingUserEmail] = useState('')
+
+  const saveUsers = useCallback((newUsers: FlakesUser[]) => {
+    localStorage.setItem('buggy-users', JSON.stringify(newUsers))
+  }, [])
+
+  const init = useCallback(() => {
+    // Handle ?reset=true URL parameter
+    if (searchParams.get('reset') === 'true') {
+      localStorage.removeItem('buggy-users')
+      localStorage.removeItem('buggy-session')
+      setUsers([])
+      setCurrentFlakesUser(null)
+      return
+    }
+
+    // Load from localStorage
+    const storedUsers = localStorage.getItem('buggy-users')
+    const storedSession = localStorage.getItem('buggy-session')
+    
+    if (storedUsers) {
+      setUsers(JSON.parse(storedUsers))
+    }
+    if (storedSession) {
+      setCurrentFlakesUser(JSON.parse(storedSession))
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    init()
+  }, [init])
 
   useEffect(() => {
     setRandomId(`input-${Math.random().toString(36).substr(2, 9)}`)
@@ -23,6 +70,139 @@ export default function BuggyPage() {
       setSlowLoadVisible(true)
     }, 3000)
   }, [])
+
+  // FLAKES Demo handlers
+  const handleCreateUser = (e: React.FormEvent) => {
+    e.preventDefault()
+    const emailInput = document.getElementById('email') as HTMLInputElement
+    const nameInput = document.getElementById('name') as HTMLInputElement
+    const passwordInput = document.getElementById('password') as HTMLInputElement
+    
+    const email = emailInput?.value
+    const name = nameInput?.value
+    const password = passwordInput?.value
+
+    if (!email || !name || !password) return
+
+    if (users.find(u => u.email === email)) {
+      alert('User already exists')
+      return
+    }
+
+    const newUsers = [...users, { email, name, password }]
+    setUsers(newUsers)
+    saveUsers(newUsers)
+
+    // Show success message
+    setUserCreatedMsg(true)
+    setTimeout(() => setUserCreatedMsg(false), 3000)
+
+    // Clear form
+    emailInput.value = ''
+    nameInput.value = ''
+    passwordInput.value = ''
+  }
+
+  const handleClearForm = () => {
+    const emailInput = document.getElementById('email') as HTMLInputElement
+    const nameInput = document.getElementById('name') as HTMLInputElement
+    const passwordInput = document.getElementById('password') as HTMLInputElement
+    
+    if (emailInput) emailInput.value = ''
+    if (nameInput) nameInput.value = ''
+    if (passwordInput) passwordInput.value = ''
+  }
+
+  const handleFlakesLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    const emailInput = document.getElementById('login-email') as HTMLInputElement
+    const passwordInput = document.getElementById('login-password') as HTMLInputElement
+    
+    const email = emailInput?.value
+    const password = passwordInput?.value
+
+    const user = users.find(u => u.email === email && u.password === password)
+    if (user) {
+      setCurrentFlakesUser(user)
+      localStorage.setItem('buggy-session', JSON.stringify(user))
+    } else {
+      alert('Invalid credentials')
+    }
+  }
+
+  const handleFlakesLogout = () => {
+    setCurrentFlakesUser(null)
+    localStorage.removeItem('buggy-session')
+  }
+
+  const deleteUserByEmail = (email: string) => {
+    const newUsers = users.filter(u => u.email !== email)
+    setUsers(newUsers)
+    saveUsers(newUsers)
+    
+    // If deleted user is logged in, log them out
+    if (currentFlakesUser?.email === email) {
+      handleFlakesLogout()
+    }
+
+    setUserDeletedMsg(true)
+    setTimeout(() => setUserDeletedMsg(false), 3000)
+  }
+
+  const handleDeleteUser = () => {
+    const searchInput = document.getElementById('search-email') as HTMLInputElement
+    const email = searchInput?.value
+    if (email) {
+      deleteUserByEmail(email)
+    }
+  }
+
+  const editUserByEmail = (email: string) => {
+    const user = users.find(u => u.email === email)
+    if (user) {
+      const editNameInput = document.getElementById('edit-name') as HTMLInputElement
+      if (editNameInput) editNameInput.value = user.name
+      setEditingUserEmail(email)
+      setUserDetailsVisible(true)
+    }
+  }
+
+  const handleEditUser = () => {
+    const searchInput = document.getElementById('search-email') as HTMLInputElement
+    const email = searchInput?.value
+    if (email) {
+      editUserByEmail(email)
+    }
+  }
+
+  const handleSaveUser = () => {
+    const editNameInput = document.getElementById('edit-name') as HTMLInputElement
+    const newName = editNameInput?.value
+    
+    if (newName && editingUserEmail) {
+      const newUsers = users.map(u => 
+        u.email === editingUserEmail ? { ...u, name: newName } : u
+      )
+      setUsers(newUsers)
+      saveUsers(newUsers)
+      
+      // Update current user if editing themselves
+      if (currentFlakesUser?.email === editingUserEmail) {
+        const updatedUser = { ...currentFlakesUser, name: newName }
+        setCurrentFlakesUser(updatedUser)
+        localStorage.setItem('buggy-session', JSON.stringify(updatedUser))
+      }
+      
+      setUpdateSuccess(true)
+      setUserDetailsVisible(false)
+      setTimeout(() => setUpdateSuccess(false), 3000)
+    }
+  }
+
+  const handleCloseDetails = () => {
+    setUserDetailsVisible(false)
+    setEditingUserEmail('')
+  }
 
   const handleDisappearingClick = () => {
     setDisappearingText('I disappeared!')
@@ -64,6 +244,259 @@ export default function BuggyPage() {
           Practice handling common automation bugs and challenges
         </p>
       </div>
+
+      {/* FLAKES Demo Section - State (S) and Filesystem (F) issues */}
+      <Card className="border-2 border-red-200 bg-red-50/30">
+        <CardHeader>
+          <CardTitle className="text-lg">🎯 FLAKES Demo - State & Filesystem Issues</CardTitle>
+          <CardDescription>Shared state, parallel test pollution, race conditions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* User Count Display */}
+            <div id="user-count" className="text-xl font-semibold">
+              {users.length} users
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Create User Form */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium mb-3">Create User</h4>
+                <form id="create-form" onSubmit={handleCreateUser} className="space-y-3">
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="Email"
+                    required
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                  <input
+                    id="name"
+                    type="text"
+                    placeholder="Name"
+                    required
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="Password"
+                    required
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      id="create-user-btn"
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded"
+                    >
+                      Create User
+                    </button>
+                    <button
+                      id="clear-form-btn"
+                      type="button"
+                      onClick={handleClearForm}
+                      className="px-4 py-2 bg-secondary text-secondary-foreground rounded"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </form>
+                <div
+                  id="user-created-msg"
+                  style={{ display: userCreatedMsg ? 'block' : 'none' }}
+                  className="mt-3 p-2 bg-green-100 text-green-800 rounded"
+                >
+                  User created successfully!
+                </div>
+              </div>
+
+              {/* Login Form */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium mb-3">Login</h4>
+                {!currentFlakesUser ? (
+                  <form id="login-form" onSubmit={handleFlakesLogin} className="space-y-3">
+                    <input
+                      id="login-email"
+                      type="email"
+                      placeholder="Email"
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                    <input
+                      id="login-password"
+                      type="password"
+                      placeholder="Password"
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                    <button
+                      id="login-btn"
+                      type="submit"
+                      className="w-full px-4 py-2 bg-primary text-primary-foreground rounded"
+                    >
+                      Login
+                    </button>
+                  </form>
+                ) : (
+                  <div style={{ display: 'none' }}>
+                    <form id="login-form">
+                      <input id="login-email" type="email" />
+                      <input id="login-password" type="password" />
+                      <button id="login-btn" type="submit">Login</button>
+                    </form>
+                  </div>
+                )}
+
+                <div
+                  id="welcome-message"
+                  style={{ display: currentFlakesUser ? 'block' : 'none' }}
+                  className="mt-3 p-3 bg-green-100 text-green-800 rounded"
+                >
+                  Welcome, <span id="user-name">{currentFlakesUser?.name}</span>!
+                </div>
+                
+                <button
+                  id="logout-btn"
+                  style={{ display: currentFlakesUser ? 'block' : 'none' }}
+                  onClick={handleFlakesLogout}
+                  className="mt-3 w-full px-4 py-2 bg-secondary text-secondary-foreground rounded"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+
+            {/* Search and Manage Users */}
+            <div id="user-management" className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">Manage Users</h4>
+              <div className="flex gap-2">
+                <input
+                  id="search-email"
+                  type="email"
+                  placeholder="Search by email"
+                  className="flex-1 px-4 py-2 border rounded"
+                />
+                <button
+                  id="edit-user-btn"
+                  onClick={handleEditUser}
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded"
+                >
+                  Edit
+                </button>
+                <button
+                  id="delete-user-btn"
+                  onClick={handleDeleteUser}
+                  className="px-4 py-2 bg-destructive text-destructive-foreground rounded"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="user-deleted-msg"
+              style={{ display: userDeletedMsg ? 'block' : 'none' }}
+              className="p-2 bg-red-100 text-red-800 rounded"
+            >
+              User deleted successfully!
+            </div>
+
+            <div
+              id="update-success"
+              style={{ display: updateSuccess ? 'block' : 'none' }}
+              className="p-2 bg-green-100 text-green-800 rounded"
+            >
+              User updated successfully!
+            </div>
+
+            {/* User Details Modal */}
+            <div
+              id="user-details"
+              style={{ display: userDetailsVisible ? 'block' : 'none' }}
+              data-email={editingUserEmail}
+              className="border rounded-lg p-4 bg-muted"
+            >
+              <h4 className="font-medium mb-3">User Details</h4>
+              <input
+                id="edit-name"
+                type="text"
+                placeholder="Name"
+                className="w-full px-4 py-2 border rounded mb-3"
+              />
+              <div className="flex gap-2">
+                <button
+                  id="save-btn"
+                  onClick={handleSaveUser}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded"
+                >
+                  Save
+                </button>
+                <button
+                  id="close-details"
+                  onClick={handleCloseDetails}
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            {/* User List */}
+            <div id="user-list" className="space-y-2">
+              {users.map(user => (
+                <div
+                  key={user.email}
+                  className="user-row flex items-center justify-between p-3 border rounded"
+                  data-email={user.email}
+                >
+                  <div>
+                    <span className="user-name font-medium">{user.name}</span>
+                    <span className="user-email text-muted-foreground ml-4">{user.email}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      className="delete-btn px-3 py-1 bg-destructive text-destructive-foreground rounded text-sm"
+                      aria-label={`Delete ${user.name}`}
+                      onClick={() => deleteUserByEmail(user.email)}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      className="px-3 py-1 bg-secondary text-secondary-foreground rounded text-sm"
+                      aria-label={`Edit ${user.name}`}
+                      onClick={() => editUserByEmail(user.email)}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Dashboard Section (shown when logged in) */}
+            <div
+              id="dashboard-content"
+              style={{ display: currentFlakesUser ? 'block' : 'none' }}
+              className="border rounded-lg p-4 bg-muted"
+            >
+              <h4 className="font-medium mb-2">Dashboard</h4>
+              <p className="text-muted-foreground">
+                Welcome back, <span id="dashboard-user-name">{currentFlakesUser?.name}</span>!
+              </p>
+              <p className="text-sm text-muted-foreground">This is your personal dashboard.</p>
+            </div>
+
+            <div
+              id="not-authenticated"
+              style={{ display: !currentFlakesUser ? 'block' : 'none' }}
+              className="text-center py-4"
+            >
+              <p className="text-muted-foreground">
+                Please <Link to="/buggy" className="text-primary hover:underline">login</Link> to access the dashboard.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

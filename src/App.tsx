@@ -12,14 +12,6 @@ import SystemFeatures from './components/SystemFeatures'
 import ComplexScenarios from './components/ComplexScenarios'
 import BuggyPage from './components/BuggyPage'
 
-// Route-based pages for FLAKES demo
-import BasicPage from './pages/BasicPage'
-import BusinessCheckoutPage from './pages/BusinessCheckoutPage'
-import BusinessPage from './pages/BusinessPage'
-import BusinessBookingPage from './pages/BusinessBookingPage'
-import BuggyPageNew from './pages/BuggyPageNew'
-import BuggyDashboardPage from './pages/BuggyDashboardPage'
-
 function MainApp() {
   const [activeTab, setActiveTab] = useState("overview")
 
@@ -258,13 +250,7 @@ function App() {
     <BrowserRouter basename={basename}>
       <Routes>
         <Route path="/" element={<MainApp />} />
-        <Route path="/basic" element={<BasicPage />} />
         <Route path="/intermediate" element={<IntermediatePage />} />
-        <Route path="/business" element={<BusinessPage />} />
-        <Route path="/business/checkout" element={<BusinessCheckoutPage />} />
-        <Route path="/business/booking" element={<BusinessBookingPage />} />
-        <Route path="/buggy" element={<BuggyPageNew />} />
-        <Route path="/buggy/dashboard" element={<BuggyDashboardPage />} />
         <Route path="/cart" element={<CartPage />} />
       </Routes>
     </BrowserRouter>

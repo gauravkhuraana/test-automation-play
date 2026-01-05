@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -75,6 +76,46 @@ export default function BusinessFlows() {
   const [sortBy, setSortBy] = useState('name')
   const [checkoutStep, setCheckoutStep] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState('')
+
+  // FLAKES Demo state
+  const [orderConfirmation, setOrderConfirmation] = useState(false)
+  const [mobileNavVisible, setMobileNavVisible] = useState(false)
+  const [discountApplied, setDiscountApplied] = useState(false)
+  const [premiumVisible, setPremiumVisible] = useState(false)
+  const [availableSlotsVisible, setAvailableSlotsVisible] = useState(false)
+  const [slotsText, setSlotsText] = useState('')
+
+  // FLAKES Demo handlers
+  const handleFlakesCheckout = (e: React.FormEvent) => {
+    e.preventDefault()
+    setOrderConfirmation(true)
+  }
+
+  const toggleMobileNav = () => {
+    setMobileNavVisible(!mobileNavVisible)
+  }
+
+  const applyPromo = () => {
+    setDiscountApplied(true)
+  }
+
+  const handleVerifyKey = () => {
+    const keyInput = document.getElementById('api-key-input') as HTMLInputElement
+    const key = keyInput?.value || ''
+    if (key && (key.startsWith('test') || key.length >= 10)) {
+      setPremiumVisible(true)
+    }
+  }
+
+  const handleCheckAvailability = () => {
+    const dateInput = document.getElementById('booking-date') as HTMLInputElement
+    const date = dateInput?.value
+    
+    if (date) {
+      setAvailableSlotsVisible(true)
+      setSlotsText('Available - 3 slots remaining')
+    }
+  }
 
   const products: Product[] = [
     { id: '1', name: 'Selenium Grid Setup', price: 299, category: 'automation', rating: 4.5, inStock: true },
@@ -201,6 +242,223 @@ export default function BusinessFlows() {
 
   return (
     <div className="space-y-6">
+      {/* FLAKES Demo Section - Environment (E) and Konfiguration (K) issues */}
+      <Card className="border-2 border-blue-200 bg-blue-50/30">
+        <CardHeader>
+          <CardTitle className="text-lg">🎯 FLAKES Demo - Environment & Config Issues</CardTitle>
+          <CardDescription>Viewport differences, config drift, missing env variables</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Responsive CSS - CRITICAL: This causes CI failures on narrow viewports */}
+          <style>{`
+            @media (max-width: 767px) {
+              #complete-checkout-btn {
+                display: none !important;
+              }
+              .desktop-nav {
+                display: none;
+              }
+              .sidebar-form {
+                display: none;
+              }
+            }
+            
+            @media (min-width: 768px) {
+              .mobile-nav,
+              #mobile-menu-toggle,
+              #mobile-promo-code,
+              #apply-promo-mobile {
+                display: none;
+              }
+            }
+          `}</style>
+
+          <div className="space-y-6">
+            {/* Navigation Demo */}
+            <div className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">Responsive Navigation</h4>
+              
+              {/* Desktop Navigation (hidden on mobile) */}
+              <nav className="desktop-nav flex gap-4 mb-4">
+                <Link to="/cart" className="text-primary hover:underline">Cart</Link>
+                <Link id="checkout-link" to="/business/checkout" className="text-primary hover:underline">Checkout</Link>
+              </nav>
+
+              {/* Mobile Navigation (hidden on desktop) */}
+              <div className="mb-4">
+                <button
+                  id="mobile-menu-toggle"
+                  onClick={toggleMobileNav}
+                  className="px-4 py-2 border rounded"
+                >
+                  ☰ Menu
+                </button>
+                <nav
+                  className="mobile-nav mt-2"
+                  style={{ display: mobileNavVisible ? 'block' : 'none' }}
+                >
+                  <div className="flex flex-col gap-2">
+                    <Link id="mobile-checkout-link" to="/business/checkout" className="text-primary hover:underline">Checkout</Link>
+                    <Link to="/cart" className="text-primary hover:underline">Cart</Link>
+                  </div>
+                </nav>
+              </div>
+            </div>
+
+            {/* Checkout Form */}
+            <div className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">Checkout Form (Button hidden on narrow viewports)</h4>
+              <form id="checkout-form" onSubmit={handleFlakesCheckout} className="space-y-3">
+                <input
+                  id="card-number"
+                  type="text"
+                  placeholder="Card Number"
+                  maxLength={16}
+                  className="w-full px-4 py-2 border rounded"
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <input
+                    id="expiry"
+                    type="text"
+                    placeholder="MM/YY"
+                    maxLength={5}
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                  <input
+                    id="cvv"
+                    type="text"
+                    placeholder="CVV"
+                    maxLength={3}
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                </div>
+                <button
+                  id="complete-checkout-btn"
+                  type="submit"
+                  className="w-full px-4 py-2 bg-primary text-primary-foreground rounded"
+                >
+                  Complete Checkout
+                </button>
+              </form>
+
+              <div
+                id="order-confirmation"
+                style={{ display: orderConfirmation ? 'block' : 'none' }}
+                className="mt-4 p-3 bg-green-100 text-green-800 rounded"
+              >
+                Order Confirmed! Thank you for your purchase.
+              </div>
+
+              {/* Mobile promo (shown on mobile) */}
+              <div className="mt-4">
+                <input
+                  id="mobile-promo-code"
+                  type="text"
+                  placeholder="Promo Code"
+                  className="w-full px-4 py-2 border rounded mb-2"
+                />
+                <button
+                  id="apply-promo-mobile"
+                  onClick={applyPromo}
+                  className="w-full px-4 py-2 bg-secondary text-secondary-foreground rounded"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop Promo Sidebar */}
+            <div className="sidebar-form border rounded-lg p-4">
+              <h4 className="font-medium mb-3">Promo Code (Desktop)</h4>
+              <input
+                id="promo-code"
+                type="text"
+                placeholder="Promo Code"
+                className="w-full px-4 py-2 border rounded mb-2"
+              />
+              <button
+                id="apply-promo"
+                onClick={applyPromo}
+                className="w-full px-4 py-2 bg-secondary text-secondary-foreground rounded"
+              >
+                Apply
+              </button>
+            </div>
+
+            <div
+              id="discount-applied"
+              style={{ display: discountApplied ? 'block' : 'none' }}
+              className="p-3 bg-blue-100 text-blue-800 rounded"
+            >
+              Discount Applied!
+            </div>
+
+            {/* API Key Section */}
+            <div className="border rounded-lg p-4">
+              <div id="main-content">
+                <h4 className="font-medium mb-3">API Key Verification</h4>
+                <div id="api-key-section" className="space-y-3">
+                  <input
+                    id="api-key-input"
+                    type="text"
+                    placeholder="Enter API Key"
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                  <button
+                    id="verify-key-btn"
+                    onClick={handleVerifyKey}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded"
+                  >
+                    Verify Key
+                  </button>
+                </div>
+              </div>
+
+              <div
+                id="premium-content"
+                style={{ display: premiumVisible ? 'block' : 'none' }}
+                className="mt-4 p-3 bg-green-100 text-green-800 rounded"
+              >
+                <h5 className="font-medium">Premium Features Unlocked!</h5>
+                <p className="text-sm">Welcome to the premium section.</p>
+              </div>
+            </div>
+
+            {/* Booking Section */}
+            <div id="booking-section" className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">Book an Appointment</h4>
+              <div className="space-y-3">
+                <input
+                  id="booking-date"
+                  type="date"
+                  className="w-full px-4 py-2 border rounded"
+                />
+                <button
+                  id="check-availability-btn"
+                  onClick={handleCheckAvailability}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded"
+                >
+                  Check Availability
+                </button>
+              </div>
+              
+              <div
+                id="available-slots"
+                style={{ display: availableSlotsVisible ? 'block' : 'none' }}
+                className="mt-4 p-3 bg-green-100 text-green-800 rounded"
+              >
+                {slotsText}
+              </div>
+            </div>
+
+            {/* Cart Link */}
+            <div className="border rounded-lg p-4">
+              <Link to="/cart" className="text-primary hover:underline">View Cart</Link>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 md:grid-cols-2">
         
         {/* User Authentication */}
