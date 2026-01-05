@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +12,15 @@ import SystemFeatures from './components/SystemFeatures'
 import ComplexScenarios from './components/ComplexScenarios'
 import BuggyPage from './components/BuggyPage'
 
-function App() {
+// Route-based pages for FLAKES demo
+import BasicPage from './pages/BasicPage'
+import BusinessCheckoutPage from './pages/BusinessCheckoutPage'
+import BusinessPage from './pages/BusinessPage'
+import BusinessBookingPage from './pages/BusinessBookingPage'
+import BuggyPageNew from './pages/BuggyPageNew'
+import BuggyDashboardPage from './pages/BuggyDashboardPage'
+
+function MainApp() {
   const [activeTab, setActiveTab] = useState("overview")
 
   const categories = [
@@ -216,6 +225,50 @@ function App() {
       </main>
     </div>
   );
+}
+
+// Placeholder for intermediate page route
+function IntermediatePage() {
+  return (
+    <div className="min-h-screen bg-background p-8">
+      <div className="container mx-auto max-w-4xl">
+        <h1 className="text-3xl font-bold mb-8">Intermediate</h1>
+        <p className="text-muted-foreground">Intermediate scenarios page.</p>
+      </div>
+    </div>
+  )
+}
+
+// Placeholder for cart page route
+function CartPage() {
+  return (
+    <div className="min-h-screen bg-background p-8">
+      <div className="container mx-auto max-w-4xl">
+        <h1 className="text-3xl font-bold mb-8">Cart</h1>
+        <p className="text-muted-foreground">Shopping cart page.</p>
+      </div>
+    </div>
+  )
+}
+
+function App() {
+  const basename = import.meta.env.BASE_URL || '/test-automation-play/'
+  
+  return (
+    <BrowserRouter basename={basename}>
+      <Routes>
+        <Route path="/" element={<MainApp />} />
+        <Route path="/basic" element={<BasicPage />} />
+        <Route path="/intermediate" element={<IntermediatePage />} />
+        <Route path="/business" element={<BusinessPage />} />
+        <Route path="/business/checkout" element={<BusinessCheckoutPage />} />
+        <Route path="/business/booking" element={<BusinessBookingPage />} />
+        <Route path="/buggy" element={<BuggyPageNew />} />
+        <Route path="/buggy/dashboard" element={<BuggyDashboardPage />} />
+        <Route path="/cart" element={<CartPage />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App
