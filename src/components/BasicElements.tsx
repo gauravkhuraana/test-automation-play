@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,6 +44,57 @@ export default function BasicElements() {
     loading: false
   })
 
+  // FLAKES Demo state
+  const [delayedButtonEnabled, setDelayedButtonEnabled] = useState(false)
+  const [successMessageVisible, setSuccessMessageVisible] = useState(false)
+  const [formResult, setFormResult] = useState(false)
+  const [loadingSpinner, setLoadingSpinner] = useState(false)
+  const [dynamicContentVisible, setDynamicContentVisible] = useState(false)
+  const [dynamicContentText, setDynamicContentText] = useState('')
+  const [apiResultVisible, setApiResultVisible] = useState(false)
+
+  // Enable delayed button after 500ms (FLAKES demo)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDelayedButtonEnabled(true)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const handleDelayedButtonClick = () => {
+    setSuccessMessageVisible(true)
+  }
+
+  const handleContactFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormResult(true)
+  }
+
+  const handleLoadContent = () => {
+    setLoadingSpinner(true)
+    setDynamicContentVisible(false)
+    
+    setTimeout(() => {
+      setLoadingSpinner(false)
+      setDynamicContentVisible(true)
+      setDynamicContentText('Loaded successfully')
+    }, 1500)
+  }
+
+  const handleFetchData = () => {
+    // Simulates network request, wait 1 second, then complete
+    setTimeout(() => {
+      console.log('Data fetched')
+    }, 1000)
+  }
+
+  const handleApiCall = () => {
+    // Shows api-result after simulated API delay
+    setTimeout(() => {
+      setApiResultVisible(true)
+    }, 500)
+  }
+
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
@@ -71,6 +123,137 @@ export default function BasicElements() {
 
   return (
     <div className="space-y-6">
+      {/* FLAKES Demo Section - Latency (L) and Async (A) issues */}
+      <Card className="border-2 border-yellow-200 bg-yellow-50/30">
+        <CardHeader>
+          <CardTitle className="text-lg">🎯 FLAKES Demo - Latency & Async Issues</CardTitle>
+          <CardDescription>Tests that pass locally but fail in slower CI environments</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div id="main-content" className="space-y-6">
+            {/* 1.1 Delayed Button Demo */}
+            <div className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">Delayed Button Demo</h4>
+              <p className="text-sm text-muted-foreground mb-3">Button starts disabled, enables after 500ms</p>
+              <button
+                id="delayed-submit-btn"
+                disabled={!delayedButtonEnabled}
+                onClick={handleDelayedButtonClick}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Submit
+              </button>
+              <div
+                id="success-message"
+                style={{ display: successMessageVisible ? 'block' : 'none' }}
+                className="mt-3 text-green-600"
+              >
+                Success!
+              </div>
+            </div>
+
+            {/* 1.2 Form Demo */}
+            <div className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">Form Demo</h4>
+              <form id="contact-form" onSubmit={handleContactFormSubmit} className="space-y-3">
+                <input
+                  id="username"
+                  type="text"
+                  placeholder="Username"
+                  className="w-full px-4 py-2 border rounded"
+                />
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Email"
+                  className="w-full px-4 py-2 border rounded"
+                />
+                <button
+                  id="submit-btn"
+                  type="submit"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded"
+                >
+                  Submit
+                </button>
+              </form>
+              <div
+                id="form-result"
+                style={{ display: formResult ? 'block' : 'none' }}
+                className="mt-3 text-green-600"
+              >
+                Success
+              </div>
+            </div>
+
+            {/* 1.3 Dynamic Content Loading Demo */}
+            <div className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">Dynamic Content Loading Demo</h4>
+              <p className="text-sm text-muted-foreground mb-3">1500ms simulated load time</p>
+              <button
+                id="load-content-btn"
+                onClick={handleLoadContent}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded"
+              >
+                Load Content
+              </button>
+              <div
+                id="loading-spinner"
+                style={{ display: loadingSpinner ? 'block' : 'none' }}
+                className="mt-3"
+              >
+                Loading...
+              </div>
+              <div
+                id="dynamic-content"
+                style={{ display: dynamicContentVisible ? 'block' : 'none' }}
+                className="mt-3 text-green-600"
+              >
+                {dynamicContentText}
+              </div>
+            </div>
+
+            {/* 1.4 API Call Demo */}
+            <div className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">API Call Demo</h4>
+              <div className="space-x-4">
+                <button
+                  id="fetch-data-btn"
+                  onClick={handleFetchData}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded"
+                >
+                  Fetch Data
+                </button>
+                <button
+                  id="api-call-btn"
+                  onClick={handleApiCall}
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded"
+                >
+                  Call API
+                </button>
+              </div>
+              <div
+                id="api-result"
+                style={{ display: apiResultVisible ? 'block' : 'none' }}
+                className="mt-3 text-green-600"
+              >
+                API Response
+              </div>
+            </div>
+
+            {/* 1.5 Navigation Link */}
+            <div className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">Navigation</h4>
+              <Link
+                to="/intermediate"
+                className="text-primary hover:underline"
+              >
+                Go to Intermediate
+              </Link>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         
         {/* Text Inputs */}
