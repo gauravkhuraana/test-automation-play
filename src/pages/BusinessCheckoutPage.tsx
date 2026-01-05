@@ -67,7 +67,7 @@ export default function BusinessCheckoutPage() {
           style={{ display: mobileNavVisible ? 'block' : 'none' }}
         >
           <div className="flex flex-col gap-2">
-            <Link id="checkout-link" to="/business/checkout" className="text-primary hover:underline">Checkout</Link>
+            <Link id="mobile-checkout-link" to="/business/checkout" className="text-primary hover:underline">Checkout</Link>
             <Link to="/cart" className="text-primary hover:underline">Cart</Link>
           </div>
         </nav>
